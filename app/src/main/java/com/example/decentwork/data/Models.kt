@@ -1,70 +1,46 @@
 package com.example.decentwork.data
 
+import android.net.Uri
+
+enum class JobType { FULL_TIME, PART_TIME, CONTRACT, REMOTE }
+
 data class Job(
-    val id: Int,
+    val id: String,
     val title: String,
     val company: String,
     val location: String,
-    val salary: String,
-    val type: JobType,
+    val jobType: JobType,
+    val salary: String?,
     val description: String,
     val requirements: List<String>,
     val benefits: List<String>,
-    val postedDate: String
+    val applyUrl: String? = null
 )
 
-enum class JobType {
-    FULL_TIME,
-    PART_TIME,
-    CONTRACT,
-    REMOTE;
-
-    fun displayName(): String = when (this) {
-        FULL_TIME -> "Full-time"
-        PART_TIME -> "Part-time"
-        CONTRACT -> "Contract"
-        REMOTE -> "Remote"
-    }
-}
+enum class Trend { UP, DOWN, STABLE }
 
 data class EconomicIndicator(
+    val id: String,
     val name: String,
     val value: String,
-    val trend: TrendType,
-    val description: String,
-    val changePercent: String
+    val trend: Trend,
+    val lastUpdated: String
 )
-
-enum class TrendType {
-    UP, DOWN, STABLE
-}
 
 data class WorkerRight(
+    val id: String,
     val title: String,
-    val description: String,
-    val category: RightCategory,
-    val details: List<String>
+    val category: String,
+    val summary: String,
+    val details: String
 )
-
-enum class RightCategory(val displayName: String) {
-    SAFETY("Safety"),
-    COMPENSATION("Compensation"),
-    WORKING_HOURS("Working Hours"),
-    RIGHTS("Rights"),
-    EQUALITY("Equality")
-}
 
 data class CareerResource(
+    val id: String,
     val title: String,
-    val description: String,
-    val type: ResourceType,
+    val provider: String,
     val duration: String,
-    val provider: String
+    val description: String,
+    val url: String? = null
 )
 
-enum class ResourceType(val displayName: String) {
-    TRAINING("Training"),
-    EDUCATION("Education"),
-    CERTIFICATION("Certification"),
-    WORKSHOP("Workshop")
-}
