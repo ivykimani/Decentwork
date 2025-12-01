@@ -1,302 +1,45 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.decentwork.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.decentwork.data.DataRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.decentwork.data.Job
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun JobsScreen(onNavigateBack: () -> Unit) {
-    var selectedJob by remember { mutableStateOf<Job?>(null) }
-    val jobs = remember { DataRepository.getJobs() }
-
-    if (selectedJob == null) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Job Opportunities") },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                        }
-                    }
-                )
-            }
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    Text(
-                        text = "${jobs.size} positions available",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                items(jobs) { job ->
-                    JobCard(job = job, onClick = { })
-                }
-            }
-        }
-    } else {
-        JobDetailScreen(
-            job = selectedJob!!,
-            onNavigateBack = { }
-        )
-    }
-}
+import com.example.decentwork.data.JobType
+import com.example.decentwork.ui.viewmodel.JobsViewModel
 
 @Composable
-fun JobCard(job: Job, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = job.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = job.type.displayName(),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
+fun JobsScreen(onBack: () -> Unit, vm: JobsViewModel = viewModel()) {
+    val jobs by vm.jobs.collectAsState()
+    val loading by vm.loading.collectAsState()
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = job.company,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.LocationOn,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = job.location,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = job.salary,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Schedule,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = job.postedDate,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun JobDetailScreen(job: Job, onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Job Details") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                }
-            )
+            SmallTopAppBar(title = { Text("Job Opportunities") }, navigationIcon = {
+                IconButton(onClick = onBack) { Icon(Icons.Default.FilterList, contentDescription = "Back") }
+            }, actions = {
+                // filter menu could go here
+            })
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Column {
-                    Text(
-                        text = job.title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = job.company,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Posted ${job.postedDate}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            JobFilterRow(onFilterSelected = { type -> vm.filterBy(type) })
+            if (loading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        InfoRow("Location", job.location)
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
-                        InfoRow("Type", job.type.displayName())
-                        Divider(modifier = Modifier.padding(vertical = 8.dp))
-                        InfoRow("Salary", job.salary)
+            } else {
+                LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(jobs) { job ->
+                        JobCard(job = job)
                     }
-                }
-            }
-
-            item {
-                Column {
-                    Text(
-                        text = "Description",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = job.description,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            item {
-                Column {
-                    Text(
-                        text = "Requirements",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    job.requirements.forEach { requirement ->
-                        Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                            Text("• ", style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                text = requirement,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                Column {
-                    Text(
-                        text = "Benefits",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    job.benefits.forEach { benefit ->
-                        Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                            Text("• ", style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                text = benefit,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-            }
-
-            item {
-                Button(
-                    onClick = { /* Apply action */ },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Work, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Apply Now")
                 }
             }
         }
@@ -304,19 +47,60 @@ fun JobDetailScreen(job: Job, onNavigateBack: () -> Unit) {
 }
 
 @Composable
-fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium
+fun JobFilterRow(onFilterSelected: (JobType?) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text("Filter:")
+        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+            TextButton(onClick = {}) { Text("Select Job Type") }
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                DropdownMenuItem(text = { Text("All") }, onClick = { onFilterSelected(null); expanded = false })
+                DropdownMenuItem(text = { Text("Full-time") }, onClick = { onFilterSelected(JobType.FULL_TIME); expanded = false })
+                DropdownMenuItem(text = { Text("Part-time") }, onClick = { onFilterSelected(JobType.PART_TIME); expanded = false })
+                DropdownMenuItem(text = { Text("Contract") }, onClick = { onFilterSelected(JobType.CONTRACT); expanded = false })
+                DropdownMenuItem(text = { Text("Remote") }, onClick = { onFilterSelected(JobType.REMOTE); expanded = false })
+            }
+        }
+    }
+}
+
+@Composable
+fun JobCard(job: Job) {
+    var showDetails by remember { mutableStateOf(false) }
+    Card(modifier = Modifier.fillMaxWidth().clickable { showDetails = true }) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(job.title, style = MaterialTheme.typography.titleMedium)
+            Text("${job.company} • ${job.location}", style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(job.salary ?: "Salary not specified", style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+
+    if (showDetails) {
+        AlertDialog(
+            onDismissRequest = { showDetails = false },
+            title = { Text(job.title) },
+            text = {
+                Column { 
+                    Text("Company: ${job.company}")
+                    Text("Location: ${job.location}")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Description:")
+                    Text(job.description)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("Requirements:")
+                    job.requirements.forEach { Text("- $it") }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { 
+                    // Ideally open applyUrl using an Intent
+                    showDetails = false
+                }) { Text("Apply") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDetails = false }) { Text("Close") }
+            }
         )
     }
 }
